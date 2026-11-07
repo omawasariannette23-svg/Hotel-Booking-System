@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\ReservationController;
 
 // Homepage
 Route::get('/', function () {
@@ -24,18 +25,19 @@ Route::post('/logout', [AuthController::class, 'logout'])
 
 // Admin Dashboard
 Route::get('/admin/dashboard', function () {
-    return 'Admin Dashboard';
+    return view('admin.dashboard');
 })->middleware(['auth', 'role:admin']);
 
 // Staff Dashboard
 Route::get('/staff/dashboard', function () {
-    return 'Staff Dashboard';
+    return view('staff.dashboard');
 })->middleware(['auth', 'role:staff']);
 
 // Customer Dashboard
 Route::get('/user/dashboard', function () {
     return view('user.dashboard');
-})->middleware(['auth', 'role:user']);
+})->middleware(['auth', 'role:user'])
+  ->name('user.dashboard');
 
 Route::get('/register', function () {
     return view('auth.register');
@@ -44,6 +46,11 @@ Route::get('/register', function () {
 Route::post('/register', [AuthController::class, 'register'])
     ->middleware('guest')
     ->name('register.submit');
+
+    // Customer Available Rooms
+Route::get('/rooms', [RoomController::class, 'available'])
+    ->middleware(['auth', 'role:user,staff,admin'])
+    ->name('rooms.available');
 
 // Admin Rooms
 
@@ -76,3 +83,33 @@ Route::put('/admin/rooms/{id}', [RoomController::class, 'update'])
 Route::delete('/admin/rooms/{id}', [RoomController::class, 'destroy'])
     ->middleware(['auth', 'role:admin'])
     ->name('admin.rooms.destroy');
+
+//Reservations
+
+Route::post('/reservations', [ReservationController::class, 'store'])
+    ->middleware(['auth', 'role:user'])
+    ->name('reservations.store');
+
+    Route::get('/reservations/create', [ReservationController::class, 'create'])
+    ->middleware(['auth', 'role:user'])
+    ->name('reservations.create');
+
+    // View customer's reservations
+Route::get('/my-reservations', [ReservationController::class, 'index'])
+    ->middleware(['auth', 'role:user'])
+    ->name('reservations.index');
+
+    // Staff: View all reservations
+Route::get('/staff/reservations', [ReservationController::class, 'staffIndex'])
+    ->middleware(['auth', 'role:staff'])
+    ->name('staff.reservations.index');
+
+    // Approve a reservation
+Route::patch('/staff/reservations/{id}/approve', [ReservationController::class, 'confirm'])
+    ->middleware(['auth', 'role:staff'])
+    ->name('staff.reservations.confirm');
+
+// Deny a reservation
+Route::patch('/staff/reservations/{id}/deny', [ReservationController::class, 'deny'])
+    ->middleware(['auth', 'role:staff'])
+    ->name('staff.reservations.deny');

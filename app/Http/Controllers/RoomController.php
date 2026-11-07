@@ -95,4 +95,10 @@ class RoomController extends Controller
 
     return redirect()->route('admin.rooms.index');
 }
+public function available()
+{
+    $rooms = Room::where('status', 'available')->get();
+
+    return view('rooms.available', compact('rooms'));
+}
 }
