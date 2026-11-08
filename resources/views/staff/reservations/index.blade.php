@@ -5,6 +5,8 @@
 
 @section('content')
 
+<a href="{{ route('staff.dashboard') }}">Back to Dashboard</a>
+
     <h2>Manage Customer Reservations</h2>
 
     {{-- Success and error messages --}}

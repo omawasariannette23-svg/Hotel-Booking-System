@@ -67,12 +67,23 @@ public function deny($id)
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    
+public function create(Request $request)
 {
     $rooms = Room::where('status', 'available')->get();
 
-    return view('reservations.create', compact('rooms'));
+    $selectedRoomId = $request->query('room_id');
+    $checkIn = $request->query('check_in');
+    $checkOut = $request->query('check_out');
+
+    return view('reservations.create', compact(
+        'rooms',
+        'selectedRoomId',
+        'checkIn',
+        'checkOut'
+    ));
 }
+
 
     /**
      * Store a newly created resource in storage.
@@ -81,10 +92,10 @@ public function deny($id)
 {
     // 1. Validate the customer's input
     $validated = $request->validate([
-        'room_id' => 'required|exists:rooms,id',
-        'check_in' => 'required|date',
-        'check_out' => 'required|date|after:check_in',
-    ]);
+    'room_id' => 'required|exists:rooms,id',
+    'check_in' => 'required|date|after_or_equal:today',
+    'check_out' => 'required|date|after:check_in',
+]);
 
     // 2. Start a database transaction
     $reservation = DB::transaction(function () use ($validated) {

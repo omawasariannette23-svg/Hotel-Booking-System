@@ -29,7 +29,17 @@
                         <td>{{ $reservation->check_in }}</td>
                         <td>{{ $reservation->check_out }}</td>
                         <td>₱{{ number_format($reservation->total_amount, 2) }}</td>
-                        <td>{{ ucfirst($reservation->booking_status) }}</td>
+                       <td>
+                            @if ($reservation->booking_status === 'pending')
+                                <span style="color: orange;">Pending</span>
+
+                            @elseif ($reservation->booking_status === 'confirmed')
+                                    <span style="color: green;">Approved</span>
+
+                            @elseif ($reservation->booking_status === 'cancelled')
+                                        <span style="color: red;">Denied</span>
+                            @endif
+                        </td>
                     </tr>
                 @endforeach
             </tbody>

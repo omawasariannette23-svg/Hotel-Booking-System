@@ -95,10 +95,44 @@ class RoomController extends Controller
 
     return redirect()->route('admin.rooms.index');
 }
-public function available()
-{
-    $rooms = Room::where('status', 'available')->get();
 
-    return view('rooms.available', compact('rooms'));
+
+
+public function available(Request $request)
+{
+    $validated = null;
+
+    // Validate dates only when the customer starts searching
+    if ($request->filled('check_in') || $request->filled('check_out')) {
+
+        $validated = $request->validate([
+            'check_in' => ['required', 'date', 'after_or_equal:today'],
+            'check_out' => ['required', 'date', 'after:check_in'],
+        ]);
+    }
+
+    // Retrieve all operational rooms
+    $roomQuery = Room::where('status', 'available');
+
+    // Check reservation conflicts if dates were provided
+    if ($validated) {
+
+        $roomQuery->withExists([
+            'reservations as has_conflict' => function ($query) use ($validated) {
+
+                $query->whereIn('booking_status', ['pending', 'confirmed'])
+                    ->where('check_in', '<', $validated['check_out'])
+                    ->where('check_out', '>', $validated['check_in']);
+
+            }
+        ]);
+    }
+
+    $rooms = $roomQuery->get();
+
+    return view('rooms.available', compact('rooms', 'validated'));
 }
+
+
+
 }
