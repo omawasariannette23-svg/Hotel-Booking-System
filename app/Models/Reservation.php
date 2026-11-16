@@ -15,7 +15,20 @@ class Reservation extends Model
         'check_out',
         'total_amount',
         'booking_status',
+        'actual_check_in',
+        'actual_check_out',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'check_in' => 'date',
+            'check_out' => 'date',
+            'actual_check_in' => 'datetime',
+            'actual_check_out' => 'datetime',
+            'total_amount' => 'decimal:2',
+        ];
+    }
 
     public function user(): BelongsTo
     {

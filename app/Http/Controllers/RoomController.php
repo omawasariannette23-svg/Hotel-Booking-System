@@ -7,132 +7,127 @@ use Illuminate\Http\Request;
 
 class RoomController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Display all rooms for admin
     public function index()
-{
-    $rooms = Room::all();
+    {
+        $rooms = Room::all();
 
-    return view('admin.rooms.index', compact('rooms'));
-}
+        return view('admin.rooms.index', compact('rooms'));
+    }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // Show the form for creating a room
     public function create()
-{
-    return view('admin.rooms.create');
-}
+    {
+        return view('admin.rooms.create');
+    }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Store a newly created room
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'room_number' => ['required', 'string', 'unique:rooms,room_number'],
-        'room_class' => ['required', 'string'],
-        'bed_type' => ['required', 'string'],
-        'max_occupancy' => ['required', 'integer', 'min:1'],
-        'price_per_night' => ['required', 'numeric', 'min:0'],
-        'view_type' => ['required', 'string'],
-    ]);
+    {
+        $validated = $request->validate([
+            'room_number' => ['required', 'string', 'max:20', 'unique:rooms,room_number'],
+            'room_class' => ['required', 'string', 'max:100'],
+            'bed_type' => ['required', 'string', 'max:100'],
+            'max_occupancy' => ['required', 'integer', 'min:1'],
+            'price_per_night' => ['required', 'numeric', 'min:0'],
+            'view_type' => ['required', 'string', 'max:100'],
+        ]);
 
-    Room::create($validated);
+        Room::create($validated);
 
-    return redirect()->route('admin.rooms.index');
-}
+        return redirect()
+            ->route('admin.rooms.index')
+            ->with('success', 'Room added successfully!');
+    }
 
-    /**
-     * Display the specified resource.
-     */
+    // Display a specific room
     public function show(string $id)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-   public function edit(string $id)
-{
-    $room = Room::findOrFail($id);
+    // Show the form for editing a room
+    public function edit(string $id)
+    {
+        $room = Room::findOrFail($id);
 
-    return view('admin.rooms.edit', compact('room'));
-}
+        return view('admin.rooms.edit', compact('room'));
+    }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    // Update an existing room
     public function update(Request $request, string $id)
-{
-    $room = Room::findOrFail($id);
-
-    $validated = $request->validate([
-        'room_number' => ['required', 'string', 'unique:rooms,room_number,' . $id],
-        'room_class' => ['required', 'string'],
-        'bed_type' => ['required', 'string'],
-        'max_occupancy' => ['required', 'integer', 'min:1'],
-        'price_per_night' => ['required', 'numeric', 'min:0'],
-        'view_type' => ['required', 'string'],
-        'status' => ['required', 'in:available,unavailable,maintenance'],
-    ]);
-
-    $room->update($validated);
-
-    return redirect()->route('admin.rooms.index');
-}
-
-    /**
-     * Remove the specified resource from storage.
-     */
-  public function destroy(string $id)
-{
-    $room = Room::findOrFail($id);
-
-    $room->delete();
-
-    return redirect()->route('admin.rooms.index');
-}
-
-
-
-public function available(Request $request)
-{
-    $validated = null;
-
-    // Validate dates only when the customer starts searching
-    if ($request->filled('check_in') || $request->filled('check_out')) {
+    {
+        $room = Room::findOrFail($id);
 
         $validated = $request->validate([
-            'check_in' => ['required', 'date', 'after_or_equal:today'],
-            'check_out' => ['required', 'date', 'after:check_in'],
+            'room_number' => ['required', 'string', 'max:20', 'unique:rooms,room_number,' . $id],
+            'room_class' => ['required', 'string', 'max:100'],
+            'bed_type' => ['required', 'string', 'max:100'],
+            'max_occupancy' => ['required', 'integer', 'min:1'],
+            'price_per_night' => ['required', 'numeric', 'min:0'],
+            'view_type' => ['required', 'string', 'max:100'],
+            'status' => ['required', 'in:available,unavailable,maintenance'],
         ]);
+
+        $room->update($validated);
+
+        return redirect()
+            ->route('admin.rooms.index')
+            ->with('success', 'Room updated successfully!');
     }
 
-    // Retrieve all operational rooms
-    $roomQuery = Room::where('status', 'available');
+    // Delete a room
+    public function destroy(string $id)
+    {
+        $room = Room::findOrFail($id);
 
-    // Check reservation conflicts if dates were provided
-    if ($validated) {
+        // Prevent deletion if the room has reservation records
+        if ($room->reservations()->exists()) {
+            return redirect()
+                ->route('admin.rooms.index')
+                ->with('error', 'This room cannot be deleted because it has reservation records.');
+        }
 
-        $roomQuery->withExists([
-            'reservations as has_conflict' => function ($query) use ($validated) {
+        $room->delete();
 
-                $query->whereIn('booking_status', ['pending', 'confirmed'])
+        return redirect()
+            ->route('admin.rooms.index')
+            ->with('success', 'Room deleted successfully!');
+    }
+
+    // Display available rooms and check reservation conflicts
+    public function available(Request $request)
+    {
+        $validated = null;
+
+        // Validate dates only when the customer starts searching
+        if ($request->filled('check_in') || $request->filled('check_out')) {
+            $validated = $request->validate([
+                'check_in' => ['required', 'date', 'after_or_equal:today'],
+                'check_out' => ['required', 'date', 'after:check_in'],
+            ]);
+        }
+
+        // Retrieve all operational rooms
+        $roomQuery = Room::where('status', 'available');
+
+        // Check reservation conflicts if dates were provided
+        if ($validated) {
+            $roomQuery->withExists([
+                'reservations as has_conflict' => function ($query) use ($validated) {
+                    $query->whereIn('booking_status', [
+                        'pending',
+                        'confirmed',
+                        'checked_in'
+                    ])
                     ->where('check_in', '<', $validated['check_out'])
                     ->where('check_out', '>', $validated['check_in']);
+                }
+            ]);
+        }
 
-            }
-        ]);
+        $rooms = $roomQuery->get();
+
+        return view('rooms.available', compact('rooms', 'validated'));
     }
-
-    $rooms = $roomQuery->get();
-
-    return view('rooms.available', compact('rooms', 'validated'));
-}
-
-
-
 }
