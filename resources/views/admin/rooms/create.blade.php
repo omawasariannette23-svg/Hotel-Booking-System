@@ -19,7 +19,10 @@
         </div>
     @endif
 
-    <form action="{{ route('admin.rooms.store') }}" method="POST">
+    <form action="{{ route('admin.rooms.store') }}"
+          method="POST"
+          enctype="multipart/form-data">
+
         @csrf
 
         <label>Room Number:</label>
@@ -59,10 +62,12 @@
                 {{ old('status', 'available') == 'available' ? 'selected' : '' }}>
                 Available
             </option>
+
             <option value="unavailable"
                 {{ old('status') == 'unavailable' ? 'selected' : '' }}>
                 Unavailable
             </option>
+
             <option value="maintenance"
                 {{ old('status') == 'maintenance' ? 'selected' : '' }}>
                 Maintenance
@@ -70,10 +75,32 @@
         </select>
         <br><br>
 
+        <hr>
+
+        <h3>Room Photos</h3>
+        <p>Select a photo to represent this room. You can change it later.</p>
+
+        <label for="image">Upload Room Photo:</label>
+        <input type="file"
+               name="image"
+               id="image"
+               accept="image/jpeg,image/png,image/webp">
+
+        <p>Accepted formats: JPG, JPEG, PNG, WEBP. Maximum size: 2 MB.</p>
+
+        @error('image')
+            <p style="color: red;">{{ $message }}</p>
+        @enderror
+
+        <br>
+
         <button type="submit">Save Room</button>
+
     </form>
 
-    <p><a href="{{ route('admin.rooms.index') }}">Back to Room List</a></p>
+    <p>
+        <a href="{{ route('admin.rooms.index') }}">Back to Room List</a>
+    </p>
 
 </body>
 </html>

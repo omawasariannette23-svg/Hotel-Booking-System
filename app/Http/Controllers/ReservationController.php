@@ -30,30 +30,125 @@ class ReservationController extends Controller
             ->firstOrFail();
 
         if (!in_array($reservation->booking_status, ['pending', 'confirmed'])) {
-            return back()->with(
-                'error',
-                'This reservation can no longer be cancelled.'
-            );
+            return back()->with('error', 'This reservation can no longer be cancelled.');
         }
 
         $reservation->update([
             'booking_status' => 'cancelled',
         ]);
 
-        return back()->with(
-            'success',
-            'Reservation cancelled successfully!'
-        );
+        return back()->with('success', 'Reservation cancelled successfully!');
     }
 
-    // Display all reservations for staff and admin
-    public function staffIndex()
+    // Display active reservations with filters
+    public function staffIndex(Request $request)
     {
-        $reservations = Reservation::with(['user', 'room'])
-            ->latest()
-            ->get();
+        $query = Reservation::with(['user', 'room'])
+            ->whereIn('booking_status', [
+                'pending',
+                'confirmed',
+                'checked_in',
+            ]);
 
-        return view('staff.reservations.index', compact('reservations'));
+        // Month filter
+        if ($request->filled('month')) {
+            $query->whereMonth('check_in', $request->month);
+        }
+
+        // Year filter
+        if ($request->filled('year')) {
+            $query->whereYear('check_in', $request->year);
+        }
+
+        // Status filter
+        if ($request->filled('status')) {
+            $allowedStatuses = ['pending', 'confirmed', 'checked_in'];
+
+            if (in_array($request->status, $allowedStatuses)) {
+                $query->where('booking_status', $request->status);
+            }
+        }
+
+        // Search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('booking_reference', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $reservations = $query
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+        // Summary counts
+        $pendingCount = Reservation::where('booking_status', 'pending')->count();
+        $confirmedCount = Reservation::where('booking_status', 'confirmed')->count();
+        $checkedInCount = Reservation::where('booking_status', 'checked_in')->count();
+
+        return view('staff.reservations.index', compact(
+            'reservations',
+            'pendingCount',
+            'confirmedCount',
+            'checkedInCount'
+        ));
+    }
+
+    // Display reservation history
+    public function staffHistory(Request $request)
+    {
+        $query = Reservation::with(['user', 'room'])
+            ->whereIn('booking_status', [
+                'completed',
+                'cancelled',
+            ]);
+
+        // Month filter
+        if ($request->filled('month')) {
+            $query->whereMonth('check_in', $request->month);
+        }
+
+        // Year filter
+        if ($request->filled('year')) {
+            $query->whereYear('check_in', $request->year);
+        }
+
+        // Status filter
+        if ($request->filled('status')) {
+            $allowedStatuses = ['completed', 'cancelled'];
+
+            if (in_array($request->status, $allowedStatuses)) {
+                $query->where('booking_status', $request->status);
+            }
+        }
+
+        // Search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('booking_reference', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $reservations = $query
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('staff.reservations.history', compact('reservations'));
     }
 
     // Approve a pending reservation
@@ -62,20 +157,14 @@ class ReservationController extends Controller
         $reservation = Reservation::findOrFail($id);
 
         if ($reservation->booking_status !== 'pending') {
-            return back()->with(
-                'error',
-                'Only pending reservations can be approved.'
-            );
+            return back()->with('error', 'Only pending reservations can be approved.');
         }
 
         $reservation->update([
             'booking_status' => 'confirmed',
         ]);
 
-        return back()->with(
-            'success',
-            'Reservation approved successfully!'
-        );
+        return back()->with('success', 'Reservation approved successfully!');
     }
 
     // Deny a pending reservation
@@ -84,20 +173,14 @@ class ReservationController extends Controller
         $reservation = Reservation::findOrFail($id);
 
         if ($reservation->booking_status !== 'pending') {
-            return back()->with(
-                'error',
-                'Only pending reservations can be denied.'
-            );
+            return back()->with('error', 'Only pending reservations can be denied.');
         }
 
         $reservation->update([
             'booking_status' => 'cancelled',
         ]);
 
-        return back()->with(
-            'success',
-            'Reservation denied successfully!'
-        );
+        return back()->with('success', 'Reservation denied successfully!');
     }
 
     // Check in a guest
@@ -106,52 +189,32 @@ class ReservationController extends Controller
         $reservation = Reservation::with('room')->findOrFail($id);
 
         if ($reservation->booking_status !== 'confirmed') {
-            return back()->with(
-                'error',
-                'Only confirmed reservations can be checked in.'
-            );
+            return back()->with('error', 'Only confirmed reservations can be checked in.');
         }
 
-        // Check whether the room is still available
         if (!$reservation->room || $reservation->room->status !== 'available') {
-            return back()->with(
-                'error',
-                'Check-in is not allowed because this room is unavailable or under maintenance.'
-            );
+            return back()->with('error', 'Check-in is not allowed because this room is unavailable or under maintenance.');
         }
 
         $today = now()->toDateString();
 
-        // Convert reservation dates into date strings
         $checkInDate = $reservation->check_in->toDateString();
         $checkOutDate = $reservation->check_out->toDateString();
 
-        // Prevent early check-in
         if ($today < $checkInDate) {
-            return back()->with(
-                'error',
-                'The guest cannot check in before the scheduled check-in date.'
-            );
+            return back()->with('error', 'The guest cannot check in before the scheduled check-in date.');
         }
 
-        // Prevent check-in on or after checkout date
         if ($today >= $checkOutDate) {
-            return back()->with(
-                'error',
-                'The scheduled checkout date has already arrived. Check-in is no longer allowed.'
-            );
+            return back()->with('error', 'The scheduled checkout date has already arrived. Check-in is no longer allowed.');
         }
 
-        // Record actual check-in date and time
         $reservation->update([
             'booking_status' => 'checked_in',
             'actual_check_in' => now(),
         ]);
 
-        return back()->with(
-            'success',
-            'Guest checked in successfully!'
-        );
+        return back()->with('success', 'Guest checked in successfully!');
     }
 
     // Check out a guest
@@ -160,22 +223,15 @@ class ReservationController extends Controller
         $reservation = Reservation::findOrFail($id);
 
         if ($reservation->booking_status !== 'checked_in') {
-            return back()->with(
-                'error',
-                'Only checked-in guests can check out.'
-            );
+            return back()->with('error', 'Only checked-in guests can check out.');
         }
 
-        // Record actual check-out date and time
         $reservation->update([
             'booking_status' => 'completed',
             'actual_check_out' => now(),
         ]);
 
-        return back()->with(
-            'success',
-            'Guest checked out successfully!'
-        );
+        return back()->with('success', 'Guest checked out successfully!');
     }
 
     // Show reservation form
@@ -187,12 +243,12 @@ class ReservationController extends Controller
         $checkIn = $request->query('check_in');
         $checkOut = $request->query('check_out');
 
-        return view('reservations.create', compact(
-            'rooms',
-            'selectedRoomId',
-            'checkIn',
-            'checkOut'
-        ));
+        return view('reservations.create', [
+            'rooms' => $rooms,
+            'selectedRoomId' => $selectedRoomId,
+            'checkIn' => $checkIn,
+            'checkOut' => $checkOut,
+        ]);
     }
 
     // Store a new reservation
@@ -218,7 +274,7 @@ class ReservationController extends Controller
                 ->whereIn('booking_status', [
                     'pending',
                     'confirmed',
-                    'checked_in'
+                    'checked_in',
                 ])
                 ->where('check_in', '<', $validated['check_out'])
                 ->where('check_out', '>', $validated['check_in'])
@@ -254,9 +310,6 @@ class ReservationController extends Controller
                 ]);
         }
 
-        return back()->with(
-            'success',
-            'Reservation request submitted successfully!'
-        );
+        return back()->with('success', 'Reservation request submitted successfully!');
     }
 }

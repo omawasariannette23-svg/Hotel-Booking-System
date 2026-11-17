@@ -11,8 +11,8 @@ use Illuminate\Support\Facades\Route;
 // ========================================
 
 Route::get('/', function () {
-    return view('welcome');
-});
+    return view('home');
+})->name('home');
 
 // ========================================
 // AUTHENTICATION
@@ -34,10 +34,9 @@ Route::post('/logout', [AuthController::class, 'logout'])
 // Registration
 Route::get('/register', function () {
     return view('auth.register');
-})->middleware('guest')->name('register');
+})->name('register');
 
 Route::post('/register', [AuthController::class, 'register'])
-    ->middleware('guest')
     ->name('register.submit');
 
 // ========================================
@@ -70,36 +69,34 @@ Route::get('/rooms', [RoomController::class, 'available'])
     ->middleware(['auth', 'role:user,staff,admin'])
     ->name('rooms.available');
 
+Route::get('/rooms/{room}', [RoomController::class, 'show'])
+    ->middleware(['auth', 'role:user,staff,admin'])
+    ->name('rooms.show');
+
 // ========================================
 // ADMIN ROOM MANAGEMENT
 // ========================================
 
-// View Rooms
 Route::get('/admin/rooms', [RoomController::class, 'index'])
     ->middleware(['auth', 'role:admin'])
     ->name('admin.rooms.index');
 
-// Create Room Form
 Route::get('/admin/rooms/create', [RoomController::class, 'create'])
     ->middleware(['auth', 'role:admin'])
     ->name('admin.rooms.create');
 
-// Store Room
 Route::post('/admin/rooms', [RoomController::class, 'store'])
     ->middleware(['auth', 'role:admin'])
     ->name('admin.rooms.store');
 
-// Edit Room Form
 Route::get('/admin/rooms/{id}/edit', [RoomController::class, 'edit'])
     ->middleware(['auth', 'role:admin'])
     ->name('admin.rooms.edit');
 
-// Update Room
 Route::put('/admin/rooms/{id}', [RoomController::class, 'update'])
     ->middleware(['auth', 'role:admin'])
     ->name('admin.rooms.update');
 
-// Delete Room
 Route::delete('/admin/rooms/{id}', [RoomController::class, 'destroy'])
     ->middleware(['auth', 'role:admin'])
     ->name('admin.rooms.destroy');
@@ -108,22 +105,18 @@ Route::delete('/admin/rooms/{id}', [RoomController::class, 'destroy'])
 // CUSTOMER RESERVATIONS
 // ========================================
 
-// Create Reservation Form
 Route::get('/reservations/create', [ReservationController::class, 'create'])
     ->middleware(['auth', 'role:user'])
     ->name('reservations.create');
 
-// Submit Reservation
 Route::post('/reservations', [ReservationController::class, 'store'])
     ->middleware(['auth', 'role:user'])
     ->name('reservations.store');
 
-// View Customer Reservations
 Route::get('/my-reservations', [ReservationController::class, 'index'])
     ->middleware(['auth', 'role:user'])
     ->name('reservations.index');
 
-// Cancel Reservation
 Route::patch('/my-reservations/{id}/cancel', [ReservationController::class, 'cancel'])
     ->middleware(['auth', 'role:user'])
     ->name('reservations.cancel');
@@ -132,10 +125,15 @@ Route::patch('/my-reservations/{id}/cancel', [ReservationController::class, 'can
 // STAFF AND ADMIN RESERVATION MANAGEMENT
 // ========================================
 
-// View All Reservations
+// Active Reservations
 Route::get('/staff/reservations', [ReservationController::class, 'staffIndex'])
     ->middleware(['auth', 'role:staff,admin'])
     ->name('staff.reservations.index');
+
+// Reservation History
+Route::get('/staff/reservations/history', [ReservationController::class, 'staffHistory'])
+    ->middleware(['auth', 'role:staff,admin'])
+    ->name('staff.reservations.history');
 
 // Approve Reservation
 Route::patch('/staff/reservations/{id}/approve', [ReservationController::class, 'confirm'])

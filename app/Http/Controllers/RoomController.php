@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Room;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class RoomController extends Controller
 {
@@ -31,7 +32,14 @@ class RoomController extends Controller
             'max_occupancy' => ['required', 'integer', 'min:1'],
             'price_per_night' => ['required', 'numeric', 'min:0'],
             'view_type' => ['required', 'string', 'max:100'],
+            'status' => ['required', 'in:available,unavailable,maintenance'],
+            'image' => ['nullable', 'image', 'max:2048'],
         ]);
+
+        // Upload room image if provided
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('rooms', 'public');
+        }
 
         Room::create($validated);
 
@@ -41,10 +49,10 @@ class RoomController extends Controller
     }
 
     // Display a specific room
-    public function show(string $id)
-    {
-        //
-    }
+    public function show(Room $room)
+{
+    return view('rooms.show', compact('room'));
+}
 
     // Show the form for editing a room
     public function edit(string $id)
@@ -67,7 +75,18 @@ class RoomController extends Controller
             'price_per_night' => ['required', 'numeric', 'min:0'],
             'view_type' => ['required', 'string', 'max:100'],
             'status' => ['required', 'in:available,unavailable,maintenance'],
+            'image' => ['nullable', 'image', 'max:2048'],
         ]);
+
+        // Replace the old image if a new one is uploaded
+        if ($request->hasFile('image')) {
+
+            if ($room->image) {
+                Storage::disk('public')->delete($room->image);
+            }
+
+            $validated['image'] = $request->file('image')->store('rooms', 'public');
+        }
 
         $room->update($validated);
 
@@ -86,6 +105,11 @@ class RoomController extends Controller
             return redirect()
                 ->route('admin.rooms.index')
                 ->with('error', 'This room cannot be deleted because it has reservation records.');
+        }
+
+        // Delete the room image
+        if ($room->image) {
+            Storage::disk('public')->delete($room->image);
         }
 
         $room->delete();

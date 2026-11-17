@@ -15,6 +15,7 @@ class Room extends Model
         'price_per_night',
         'status',
         'view_type',
+        'image',
     ];
 
     public function reservations(): HasMany
