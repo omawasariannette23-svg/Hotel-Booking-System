@@ -1,11 +1,14 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Home | Hotel Booking System</title>
+    <title>L'Arikabel Hotel | Home</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         * {
@@ -35,9 +38,10 @@
 
         .hotel-logo {
             color: white;
-            font-family: Georgia, serif;
-            font-size: 25px;
-            font-weight: bold;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 32px;
+            font-weight: 600;
+            letter-spacing: 1px;
             text-decoration: none;
         }
 
@@ -102,8 +106,9 @@
         }
 
         .hero h1 {
-            font-family: Georgia, serif;
-            font-size: clamp(38px, 6vw, 65px);
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: clamp(42px, 6vw, 72px);
+            font-weight: 500;
             line-height: 1.2;
             margin-bottom: 22px;
         }
@@ -149,8 +154,9 @@
         }
 
         .about-section h2 {
-            font-family: Georgia, serif;
-            font-size: 36px;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 42px;
+            font-weight: 600;
             color: #183b56;
             margin-bottom: 22px;
         }
@@ -180,6 +186,10 @@
                 text-align: center;
             }
 
+            .hotel-logo {
+                font-size: 29px;
+            }
+
             .nav-links {
                 justify-content: center;
                 gap: 16px;
@@ -190,7 +200,7 @@
             }
 
             .hero h1 {
-                font-size: 38px;
+                font-size: 42px;
             }
 
             .hero-description {
@@ -202,7 +212,7 @@
             }
 
             .about-section h2 {
-                font-size: 29px;
+                font-size: 34px;
             }
         }
     </style>
@@ -215,18 +225,16 @@
     <header class="navbar">
 
         <a href="{{ route('home') }}" class="hotel-logo">
-            HOTEL BOOKING
+            L'Arikabel Hotel
         </a>
 
         <nav class="nav-links">
 
             <a href="{{ route('home') }}">Home</a>
 
-            <a href="#about">About Us</a>
+            <a href="{{ route('about') }}">About Us</a>
 
             <a href="{{ route('login') }}">Rooms</a>
-
-            <a href="#contact">Contact Us</a>
 
             <a href="{{ route('login') }}">Login</a>
 
@@ -245,7 +253,7 @@
         <div class="hero-content">
 
             <p class="hero-subtitle">
-                Welcome to our hotel
+                Welcome to L'Arikabel Hotel
             </p>
 
             <h1>
@@ -271,26 +279,26 @@
     <section class="about-section" id="about">
 
         <p class="section-subtitle">
-            Discover Our Hotel
+            Discover L'Arikabel
         </p>
 
         <h2>A Stay Worth Remembering</h2>
 
         <p>
             Whether you're traveling for relaxation or a special occasion,
-            we offer a welcoming place to rest, recharge, and enjoy your stay.
-            Experience comfort, convenience, and thoughtful hospitality
-            throughout your visit.
+            L'Arikabel Hotel offers a welcoming place to rest, recharge,
+            and enjoy your stay. Experience comfort, convenience, and
+            thoughtful hospitality throughout your visit.
         </p>
 
     </section>
 
-    <!-- CONTACT PLACEHOLDER -->
+    <!-- FOOTER -->
 
     <footer class="footer" id="contact">
 
         <p>
-            &copy; {{ date('Y') }} Hotel Booking System.
+            &copy; {{ date('Y') }} L'Arikabel Hotel.
             All Rights Reserved.
         </p>
 

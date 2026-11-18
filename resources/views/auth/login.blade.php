@@ -1,11 +1,14 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Hotel Booking System - Login</title>
+    <title>Login | L'Arikabel Hotel</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         * {
@@ -16,8 +19,9 @@
 
         body {
             min-height: 100vh;
-            font-family: Georgia, serif;
+            font-family: Arial, sans-serif;
             background: #f4f7fa;
+            color: #243b53;
         }
 
         .login-container {
@@ -35,7 +39,7 @@
             background:
                 linear-gradient(
                     to top,
-                    rgba(12, 35, 53, 0.75),
+                    rgba(12, 35, 53, 0.78),
                     rgba(12, 35, 53, 0.05)
                 ),
                 url("{{ asset('images/login-cover.jfif') }}");
@@ -50,15 +54,18 @@
         }
 
         .hotel-text h1 {
-            font-size: 43px;
-            font-weight: normal;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 58px;
+            font-weight: 500;
             margin-bottom: 15px;
+            line-height: 1.1;
         }
 
         .hotel-text p {
-            font-size: 18px;
-            line-height: 1.7;
+            font-size: 17px;
+            line-height: 1.8;
             color: #e5edf4;
+            max-width: 450px;
         }
 
         /* LOGIN FORM SECTION */
@@ -71,7 +78,7 @@
             justify-content: center;
             align-items: center;
 
-            padding: 45px;
+            padding: 35px 45px;
             background: #f4f7fa;
         }
 
@@ -80,27 +87,54 @@
             max-width: 420px;
         }
 
+        /* HOTEL HEADER */
+
+        .hotel-header {
+            text-align: center;
+            margin-bottom: 38px;
+        }
+
+        .hotel-logo {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 38px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: #183b56;
+            text-decoration: none;
+        }
+
+        .hotel-tagline {
+            color: #b58b54;
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-top: 3px;
+        }
+
         .hotel-icon {
             text-align: center;
-            font-size: 42px;
-            color: #183b56;
-            margin-bottom: 15px;
+            font-size: 35px;
+            color: #b58b54;
+            margin-bottom: 12px;
         }
 
         .login-box h2 {
             text-align: center;
-            font-size: 34px;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 36px;
             color: #183b56;
-            font-weight: normal;
-            margin-bottom: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
         }
 
         .subtitle {
             text-align: center;
             color: #718394;
             margin-bottom: 35px;
-            font-size: 15px;
+            font-size: 14px;
         }
+
+        /* FORM FIELDS */
 
         .form-group {
             margin-bottom: 22px;
@@ -110,7 +144,8 @@
             display: block;
             margin-bottom: 9px;
             color: #29465d;
-            font-size: 15px;
+            font-size: 14px;
+            font-weight: 600;
         }
 
         .form-group input {
@@ -119,10 +154,10 @@
             border: 1px solid #cbd8e2;
             border-radius: 8px;
             background: #ffffff;
-            font-size: 15px;
+            font-size: 14px;
             outline: none;
             transition: 0.2s;
-            font-family: Georgia, serif;
+            font-family: Arial, sans-serif;
         }
 
         .form-group input:focus {
@@ -149,7 +184,7 @@
             border: none;
             cursor: pointer;
             color: #627d98;
-            font-family: Georgia, serif;
+            font-family: Arial, sans-serif;
             font-size: 13px;
             font-weight: bold;
         }
@@ -158,6 +193,8 @@
             color: #183b56;
         }
 
+        /* LOGIN BUTTON */
+
         .login-button {
             width: 100%;
             padding: 15px;
@@ -165,8 +202,9 @@
             border-radius: 8px;
             background: #183b56;
             color: white;
-            font-size: 17px;
-            font-family: Georgia, serif;
+            font-size: 15px;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
             cursor: pointer;
             transition: 0.2s;
             margin-top: 5px;
@@ -176,11 +214,13 @@
             background: #102c42;
         }
 
+        /* REGISTER LINK */
+
         .register-text {
             text-align: center;
             margin-top: 28px;
             color: #718394;
-            font-size: 15px;
+            font-size: 14px;
         }
 
         .register-text a {
@@ -190,8 +230,11 @@
         }
 
         .register-text a:hover {
+            color: #b58b54;
             text-decoration: underline;
         }
+
+        /* MESSAGES */
 
         .message {
             padding: 12px;
@@ -210,20 +253,40 @@
             color: #a33d35;
         }
 
+        /* BACK TO HOMEPAGE */
+
+        .home-link {
+            display: block;
+            text-align: center;
+            margin-top: 22px;
+            color: #829ab1;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .home-link:hover {
+            color: #183b56;
+        }
+
         /* MOBILE RESPONSIVENESS */
 
         @media (max-width: 800px) {
+
             .hotel-section {
                 display: none;
             }
 
             .form-section {
                 flex: 1;
-                padding: 30px 22px;
+                padding: 35px 22px;
             }
 
             .login-box h2 {
-                font-size: 30px;
+                font-size: 32px;
+            }
+
+            .hotel-logo {
+                font-size: 34px;
             }
         }
     </style>
@@ -233,28 +296,52 @@
 
 <div class="login-container">
 
+    <!-- HOTEL PHOTO SECTION -->
+
     <div class="hotel-section">
+
         <div class="hotel-text">
+
             <h1>Welcome to Your Stay</h1>
 
             <p>
-                Comfort, relaxation, and memorable experiences
-                begin with the perfect reservation.
+                At L'Arikabel Hotel, comfort, relaxation, and
+                memorable experiences begin with the perfect reservation.
             </p>
+
         </div>
+
     </div>
+
+    <!-- LOGIN FORM SECTION -->
 
     <div class="form-section">
 
         <div class="login-box">
 
+            <!-- HOTEL HEADER -->
+
+            <div class="hotel-header">
+
+                <a href="{{ route('home') }}" class="hotel-logo">
+                    L'Arikabel Hotel
+                </a>
+
+                <p class="hotel-tagline">
+                    Comfort • Elegance • Hospitality
+                </p>
+
+            </div>
+
             <div class="hotel-icon">✦</div>
 
-            <h2>Hotel Booking System</h2>
+            <h2>Welcome Back</h2>
 
             <p class="subtitle">
-                Welcome back! Please log in to continue.
+                Please log in to access your account.
             </p>
+
+            {{-- SUCCESS MESSAGE --}}
 
             @if (session('success'))
                 <div class="message success-message">
@@ -262,11 +349,15 @@
                 </div>
             @endif
 
+            {{-- VALIDATION ERRORS --}}
+
             @if ($errors->any())
                 <div class="message error-message">
                     {{ $errors->first() }}
                 </div>
             @endif
+
+            {{-- LOGIN FORM --}}
 
             <form action="{{ route('login.submit') }}" method="POST">
                 @csrf
@@ -289,6 +380,7 @@
                     <label for="password">Password</label>
 
                     <div class="password-wrapper">
+
                         <input
                             type="password"
                             id="password"
@@ -305,6 +397,7 @@
                         >
                             Show
                         </button>
+
                     </div>
                 </div>
 
@@ -318,6 +411,10 @@
                 Don't have an account?
                 <a href="{{ route('register') }}">Register here</a>
             </p>
+
+            <a href="{{ route('home') }}" class="home-link">
+                ← Back to Homepage
+            </a>
 
         </div>
 

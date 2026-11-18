@@ -1,11 +1,16 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>@yield('title', 'Hotel Booking System')</title>
+    <title>@yield('title', "L'Arikabel Hotel")</title>
+
+    <!-- Google Fonts: Cormorant Garamond -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         * {
@@ -34,8 +39,10 @@
         }
 
         header h1 {
-            font-size: 26px;
-            letter-spacing: 0.3px;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 38px;
+            font-weight: 500;
+            letter-spacing: 1.5px;
         }
 
         /* NAVIGATION */
@@ -215,6 +222,10 @@
                 padding: 20px;
             }
 
+            header h1 {
+                font-size: 32px;
+            }
+
             nav {
                 padding: 15px 20px;
             }
@@ -242,7 +253,7 @@
 
     <header>
         <div class="header-content">
-            <h1>Hotel Booking System</h1>
+            <h1>L'Arikabel Hotel</h1>
         </div>
     </header>
 
@@ -253,15 +264,12 @@
                 Home
             </a>
 
-            <a href="{{ url('/about') }}">About Us</a>
+            <a href="{{ route('about') }}">About Us</a>
 
             <a href="{{ url('/gallery') }}">Gallery</a>
 
             <a href="{{ url('/rooms') }}">Rooms</a>
 
-            <a href="{{ url('/contact') }}">Contact Us</a>
-
-            <a href="{{ url('/blog') }}">Blog</a>
 
             @auth
                 <details class="account-menu">
@@ -331,7 +339,7 @@
     </main>
 
     <footer>
-        &copy; {{ date('Y') }} Hotel Booking System. All rights reserved.
+        &copy; {{ date('Y') }} L'Arikabel Hotel. All rights reserved.
     </footer>
 
 </body>

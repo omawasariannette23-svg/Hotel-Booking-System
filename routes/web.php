@@ -1,4 +1,3 @@
-
 <?php
 
 use App\Http\Controllers\AuthController;
@@ -6,17 +5,29 @@ use App\Http\Controllers\RoomController;
 use App\Http\Controllers\ReservationController;
 use Illuminate\Support\Facades\Route;
 
-// ========================================
-// HOMEPAGE
-// ========================================
 
+/*
+|--------------------------------------------------------------------------
+| PUBLIC PAGES
+|--------------------------------------------------------------------------
+*/
+
+// Homepage
 Route::get('/', function () {
     return view('home');
 })->name('home');
 
-// ========================================
-// AUTHENTICATION
-// ========================================
+// About Us
+Route::get('/about', function () {
+    return view('about');
+})->name('about');
+
+
+/*
+|--------------------------------------------------------------------------
+| AUTHENTICATION
+|--------------------------------------------------------------------------
+*/
 
 // Login
 Route::get('/login', function () {
@@ -26,11 +37,6 @@ Route::get('/login', function () {
 Route::post('/login', [AuthController::class, 'login'])
     ->name('login.submit');
 
-// Logout
-Route::post('/logout', [AuthController::class, 'logout'])
-    ->middleware('auth')
-    ->name('logout');
-
 // Registration
 Route::get('/register', function () {
     return view('auth.register');
@@ -39,9 +45,17 @@ Route::get('/register', function () {
 Route::post('/register', [AuthController::class, 'register'])
     ->name('register.submit');
 
-// ========================================
-// DASHBOARDS
-// ========================================
+// Logout
+Route::post('/logout', [AuthController::class, 'logout'])
+    ->middleware('auth')
+    ->name('logout');
+
+
+/*
+|--------------------------------------------------------------------------
+| DASHBOARDS
+|--------------------------------------------------------------------------
+*/
 
 // Admin Dashboard
 Route::get('/admin/dashboard', function () {
@@ -61,96 +75,124 @@ Route::get('/user/dashboard', function () {
 })->middleware(['auth', 'role:user'])
     ->name('user.dashboard');
 
-// ========================================
-// AVAILABLE ROOMS
-// ========================================
 
-Route::get('/rooms', [RoomController::class, 'available'])
-    ->middleware(['auth', 'role:user,staff,admin'])
-    ->name('rooms.available');
+/*
+|--------------------------------------------------------------------------
+| AVAILABLE ROOMS
+|--------------------------------------------------------------------------
+*/
 
-Route::get('/rooms/{room}', [RoomController::class, 'show'])
-    ->middleware(['auth', 'role:user,staff,admin'])
-    ->name('rooms.show');
+Route::middleware(['auth', 'role:user,staff,admin'])->group(function () {
 
-// ========================================
-// ADMIN ROOM MANAGEMENT
-// ========================================
+    // View Available Rooms
+    Route::get('/rooms', [RoomController::class, 'available'])
+        ->name('rooms.available');
 
-Route::get('/admin/rooms', [RoomController::class, 'index'])
-    ->middleware(['auth', 'role:admin'])
-    ->name('admin.rooms.index');
+    // View Individual Room
+    Route::get('/rooms/{room}', [RoomController::class, 'show'])
+        ->name('rooms.show');
 
-Route::get('/admin/rooms/create', [RoomController::class, 'create'])
-    ->middleware(['auth', 'role:admin'])
-    ->name('admin.rooms.create');
+});
 
-Route::post('/admin/rooms', [RoomController::class, 'store'])
-    ->middleware(['auth', 'role:admin'])
-    ->name('admin.rooms.store');
 
-Route::get('/admin/rooms/{id}/edit', [RoomController::class, 'edit'])
-    ->middleware(['auth', 'role:admin'])
-    ->name('admin.rooms.edit');
+/*
+|--------------------------------------------------------------------------
+| ADMIN ROOM MANAGEMENT
+|--------------------------------------------------------------------------
+*/
 
-Route::put('/admin/rooms/{id}', [RoomController::class, 'update'])
-    ->middleware(['auth', 'role:admin'])
-    ->name('admin.rooms.update');
+Route::middleware(['auth', 'role:admin'])
+    ->prefix('admin/rooms')
+    ->name('admin.rooms.')
+    ->group(function () {
 
-Route::delete('/admin/rooms/{id}', [RoomController::class, 'destroy'])
-    ->middleware(['auth', 'role:admin'])
-    ->name('admin.rooms.destroy');
+        // View All Rooms
+        Route::get('/', [RoomController::class, 'index'])
+            ->name('index');
 
-// ========================================
-// CUSTOMER RESERVATIONS
-// ========================================
+        // Add Room Form
+        Route::get('/create', [RoomController::class, 'create'])
+            ->name('create');
 
-Route::get('/reservations/create', [ReservationController::class, 'create'])
-    ->middleware(['auth', 'role:user'])
-    ->name('reservations.create');
+        // Save New Room
+        Route::post('/', [RoomController::class, 'store'])
+            ->name('store');
 
-Route::post('/reservations', [ReservationController::class, 'store'])
-    ->middleware(['auth', 'role:user'])
-    ->name('reservations.store');
+        // Edit Room Form
+        Route::get('/{id}/edit', [RoomController::class, 'edit'])
+            ->name('edit');
 
-Route::get('/my-reservations', [ReservationController::class, 'index'])
-    ->middleware(['auth', 'role:user'])
-    ->name('reservations.index');
+        // Update Room
+        Route::put('/{id}', [RoomController::class, 'update'])
+            ->name('update');
 
-Route::patch('/my-reservations/{id}/cancel', [ReservationController::class, 'cancel'])
-    ->middleware(['auth', 'role:user'])
-    ->name('reservations.cancel');
+        // Delete Room
+        Route::delete('/{id}', [RoomController::class, 'destroy'])
+            ->name('destroy');
 
-// ========================================
-// STAFF AND ADMIN RESERVATION MANAGEMENT
-// ========================================
+    });
 
-// Active Reservations
-Route::get('/staff/reservations', [ReservationController::class, 'staffIndex'])
-    ->middleware(['auth', 'role:staff,admin'])
-    ->name('staff.reservations.index');
 
-// Reservation History
-Route::get('/staff/reservations/history', [ReservationController::class, 'staffHistory'])
-    ->middleware(['auth', 'role:staff,admin'])
-    ->name('staff.reservations.history');
+/*
+|--------------------------------------------------------------------------
+| CUSTOMER RESERVATIONS
+|--------------------------------------------------------------------------
+*/
 
-// Approve Reservation
-Route::patch('/staff/reservations/{id}/approve', [ReservationController::class, 'confirm'])
-    ->middleware(['auth', 'role:staff,admin'])
-    ->name('staff.reservations.confirm');
+Route::middleware(['auth', 'role:user'])->group(function () {
 
-// Deny Reservation
-Route::patch('/staff/reservations/{id}/deny', [ReservationController::class, 'deny'])
-    ->middleware(['auth', 'role:staff,admin'])
-    ->name('staff.reservations.deny');
+    // Reservation Form
+    Route::get('/reservations/create', [ReservationController::class, 'create'])
+        ->name('reservations.create');
 
-// Check In Reservation
-Route::patch('/staff/reservations/{id}/check-in', [ReservationController::class, 'checkIn'])
-    ->middleware(['auth', 'role:staff,admin'])
-    ->name('staff.reservations.checkin');
+    // Save Reservation
+    Route::post('/reservations', [ReservationController::class, 'store'])
+        ->name('reservations.store');
 
-// Check Out Reservation
-Route::patch('/staff/reservations/{id}/check-out', [ReservationController::class, 'checkOut'])
-    ->middleware(['auth', 'role:staff,admin'])
-    ->name('staff.reservations.checkout');
+    // View My Reservations
+    Route::get('/my-reservations', [ReservationController::class, 'index'])
+        ->name('reservations.index');
+
+    // Cancel Reservation
+    Route::patch('/my-reservations/{id}/cancel', [ReservationController::class, 'cancel'])
+        ->name('reservations.cancel');
+
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| STAFF AND ADMIN RESERVATION MANAGEMENT
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:staff,admin'])
+    ->prefix('staff/reservations')
+    ->name('staff.reservations.')
+    ->group(function () {
+
+        // Active Reservations
+        Route::get('/', [ReservationController::class, 'staffIndex'])
+            ->name('index');
+
+        // Reservation History
+        Route::get('/history', [ReservationController::class, 'staffHistory'])
+            ->name('history');
+
+        // Approve Reservation
+        Route::patch('/{id}/approve', [ReservationController::class, 'confirm'])
+            ->name('confirm');
+
+        // Deny Reservation
+        Route::patch('/{id}/deny', [ReservationController::class, 'deny'])
+            ->name('deny');
+
+        // Check In
+        Route::patch('/{id}/check-in', [ReservationController::class, 'checkIn'])
+            ->name('checkin');
+
+        // Check Out
+        Route::patch('/{id}/check-out', [ReservationController::class, 'checkOut'])
+            ->name('checkout');
+
+    });

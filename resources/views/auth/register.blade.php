@@ -1,11 +1,14 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Customer Registration | Hotel Booking System</title>
+    <title>Register | L'Arikabel Hotel</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         * {
@@ -18,11 +21,43 @@
             font-family: Arial, sans-serif;
             background: #f0f4f8;
             min-height: 100vh;
+            color: #243b53;
+        }
+
+        /* HEADER */
+
+        .page-header {
+            background: #183b56;
+            padding: 18px 6%;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .hotel-logo {
+            color: white;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 36px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-decoration: none;
+        }
+
+        .header-subtitle {
+            color: #d6ad72;
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-top: 3px;
+        }
+
+        /* MAIN CONTENT */
+
+        .main-content {
+            min-height: calc(100vh - 100px);
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 30px 15px;
-            color: #243b53;
+            padding: 45px 15px;
         }
 
         .register-container {
@@ -38,33 +73,22 @@
             border: 1px solid #d9e2ec;
         }
 
-        .brand {
-            text-align: center;
-            margin-bottom: 28px;
-        }
-
-        .brand h1 {
-            color: #183b56;
-            font-size: 27px;
-            margin-bottom: 8px;
-        }
-
-        .brand p {
-            color: #829ab1;
-            font-size: 14px;
-        }
-
         .form-title {
             color: #183b56;
-            font-size: 23px;
-            margin-bottom: 7px;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 5px;
         }
 
         .form-description {
             color: #627d98;
             font-size: 14px;
             margin-bottom: 25px;
+            line-height: 1.6;
         }
+
+        /* FORM FIELDS */
 
         .form-group {
             margin-bottom: 17px;
@@ -99,6 +123,7 @@
         }
 
         /* PASSWORD SHOW/HIDE */
+
         .password-wrapper {
             position: relative;
         }
@@ -124,6 +149,8 @@
             color: #183b56;
         }
 
+        /* VALIDATION ERRORS */
+
         .error-box {
             background: #fff1f0;
             border: 1px solid #f5c6cb;
@@ -137,6 +164,8 @@
         .error-box ul {
             padding-left: 18px;
         }
+
+        /* REGISTER BUTTON */
 
         .register-button {
             width: 100%;
@@ -156,6 +185,8 @@
             background: #254f70;
         }
 
+        /* LOGIN LINK */
+
         .login-link {
             text-align: center;
             margin-top: 23px;
@@ -170,8 +201,11 @@
         }
 
         .login-link a:hover {
+            color: #b58b54;
             text-decoration: underline;
         }
+
+        /* FOOTER */
 
         .footer-text {
             text-align: center;
@@ -180,13 +214,23 @@
             margin-top: 20px;
         }
 
+        /* RESPONSIVE */
+
         @media (max-width: 500px) {
             .register-card {
                 padding: 30px 22px;
             }
 
-            .brand h1 {
-                font-size: 23px;
+            .hotel-logo {
+                font-size: 30px;
+            }
+
+            .form-title {
+                font-size: 29px;
+            }
+
+            .main-content {
+                padding: 30px 15px;
             }
         }
     </style>
@@ -194,139 +238,158 @@
 
 <body>
 
-    <div class="register-container">
+    <!-- HOTEL HEADER -->
 
-        <div class="register-card">
+    <header class="page-header">
 
-            <div class="brand">
-                <h1>HOTEL BOOKING SYSTEM</h1>
-                <p>Your comfort begins with us.</p>
+        <a href="{{ route('home') }}" class="hotel-logo">
+            L'Arikabel Hotel
+        </a>
+
+        <p class="header-subtitle">
+            Comfort • Elegance • Hospitality
+        </p>
+
+    </header>
+
+    <!-- MAIN CONTENT -->
+
+    <main class="main-content">
+
+        <div class="register-container">
+
+            <div class="register-card">
+
+                <h2 class="form-title">
+                    Create an Account
+                </h2>
+
+                <p class="form-description">
+                    Register to start booking your stay with us.
+                </p>
+
+                {{-- VALIDATION ERRORS --}}
+
+                @if ($errors->any())
+                    <div class="error-box">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                {{-- REGISTRATION FORM --}}
+
+                <form action="{{ route('register.submit') }}" method="POST">
+                    @csrf
+
+                    <div class="form-group">
+                        <label for="first_name">First Name</label>
+                        <input
+                            type="text"
+                            id="first_name"
+                            name="first_name"
+                            value="{{ old('first_name') }}"
+                            placeholder="Enter your first name"
+                            autocomplete="given-name"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="last_name">Last Name</label>
+                        <input
+                            type="text"
+                            id="last_name"
+                            name="last_name"
+                            value="{{ old('last_name') }}"
+                            placeholder="Enter your last name"
+                            autocomplete="family-name"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value="{{ old('email') }}"
+                            placeholder="Enter your email address"
+                            autocomplete="email"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+
+                        <div class="password-wrapper">
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Create a password"
+                                autocomplete="new-password"
+                                required
+                            >
+
+                            <button
+                                type="button"
+                                class="toggle-password"
+                                onclick="togglePassword('password', this)"
+                            >
+                                Show
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password_confirmation">Confirm Password</label>
+
+                        <div class="password-wrapper">
+                            <input
+                                type="password"
+                                id="password_confirmation"
+                                name="password_confirmation"
+                                placeholder="Confirm your password"
+                                autocomplete="new-password"
+                                required
+                            >
+
+                            <button
+                                type="button"
+                                class="toggle-password"
+                                onclick="togglePassword('password_confirmation', this)"
+                            >
+                                Show
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="register-button">
+                        Create Account
+                    </button>
+
+                </form>
+
+                <div class="login-link">
+                    Already have an account?
+                    <a href="{{ route('login') }}">Login here</a>
+                </div>
+
             </div>
 
-            <h2 class="form-title">Create an Account</h2>
-
-            <p class="form-description">
-                Register to start booking your stay with us.
+            <p class="footer-text">
+                &copy; {{ date('Y') }} L'Arikabel Hotel. All Rights Reserved.
             </p>
-
-            {{-- VALIDATION ERRORS --}}
-            @if ($errors->any())
-                <div class="error-box">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            {{-- REGISTRATION FORM --}}
-            <form action="{{ route('register.submit') }}" method="POST">
-                @csrf
-
-                <div class="form-group">
-                    <label for="first_name">First Name</label>
-                    <input
-                        type="text"
-                        id="first_name"
-                        name="first_name"
-                        value="{{ old('first_name') }}"
-                        placeholder="Enter your first name"
-                        autocomplete="given-name"
-                        required
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label for="last_name">Last Name</label>
-                    <input
-                        type="text"
-                        id="last_name"
-                        name="last_name"
-                        value="{{ old('last_name') }}"
-                        placeholder="Enter your last name"
-                        autocomplete="family-name"
-                        required
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value="{{ old('email') }}"
-                        placeholder="Enter your email address"
-                        autocomplete="email"
-                        required
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label for="password">Password</label>
-
-                    <div class="password-wrapper">
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            placeholder="Create a password"
-                            autocomplete="new-password"
-                            required
-                        >
-
-                        <button
-                            type="button"
-                            class="toggle-password"
-                            onclick="togglePassword('password', this)"
-                        >
-                            Show
-                        </button>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="password_confirmation">Confirm Password</label>
-
-                    <div class="password-wrapper">
-                        <input
-                            type="password"
-                            id="password_confirmation"
-                            name="password_confirmation"
-                            placeholder="Confirm your password"
-                            autocomplete="new-password"
-                            required
-                        >
-
-                        <button
-                            type="button"
-                            class="toggle-password"
-                            onclick="togglePassword('password_confirmation', this)"
-                        >
-                            Show
-                        </button>
-                    </div>
-                </div>
-
-                <button type="submit" class="register-button">
-                    Create Account
-                </button>
-
-            </form>
-
-            <div class="login-link">
-                Already have an account?
-                <a href="{{ route('login') }}">Login here</a>
-            </div>
 
         </div>
 
-        <p class="footer-text">
-            Hotel Booking System &copy; {{ date('Y') }}
-        </p>
-
-    </div>
+    </main>
 
     <script>
         function togglePassword(inputId, button) {
